@@ -37,33 +37,20 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'https://smart-society-frontend-nu.vercel.app',
-  'https://smart-society-frontend.vercel.app',
-  'https://smartsociety-frontend.vercel.app',
-  'https://smart-society-frontend-nu.vercel.app/',
-  'https://smart-society-frontend.vercel.app/',
-  'https://smart-society-backend-dusky.vercel.app'
-];
-
+// ✅ CORS - FINAL FIX
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(null, true);
-    }
-  },
+  origin: '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 
-app.options('*', cors());
+app.options('*', cors({
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
@@ -76,6 +63,7 @@ connectDB();
 
 console.log('Server initializing...');
 
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/guard/dashboard', guardDashboardRoutes);
