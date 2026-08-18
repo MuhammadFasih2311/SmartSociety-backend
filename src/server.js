@@ -7,7 +7,7 @@ import connectDB from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import adminResidentRoutes from './routes/admin/adminResidentRoutes.js';
 import adminGuardRoutes from './routes/admin/adminGuardRoutes.js';
-import guardVisitorRoutes from './routes/guard/guardVisitorRoutes.js'; 
+import guardVisitorRoutes from './routes/guard/guardVisitorRoutes.js';
 import guardDashboardRoutes from './routes/guard/guardDashboardRoutes.js';
 import adminRoutes from './routes/admin/adminRoutes.js';
 import billingRoutes from './routes/admin/adminBillingRoutes.js';
@@ -36,8 +36,39 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use(helmet());
-app.use(cors());
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://smart-society-frontend-nu.vercel.app',
+  'https://smart-society-frontend.vercel.app',
+  'https://smartsociety-frontend.vercel.app',
+  'https://smart-society-frontend-nu.vercel.app/',
+  'https://smart-society-frontend.vercel.app/',
+  'https://smart-society-backend-dusky.vercel.app'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
+
+app.options('*', cors());
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -46,9 +77,7 @@ connectDB();
 console.log('Server initializing...');
 
 app.use('/api/auth', authRoutes);
-
 app.use('/api/dashboard', dashboardRoutes);
-
 app.use('/api/guard/dashboard', guardDashboardRoutes);
 app.use('/api/guard', guardVisitorRoutes);
 app.use('/api/guard', gateRoutes);
@@ -76,13 +105,12 @@ app.use('/api/resident', residentAmenityRoutes);
 app.use('/api/resident', residentNoticeRoutes);
 app.use('/api', residentPassRoutes);
 app.use('/api', residentBillRoutes);
-
 app.use('/api', residentAmenityRoutes);
 app.use('/api', residentAmenityBookingRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'SmartSociety API is running',
     timestamp: new Date().toISOString()
   });
